@@ -19,7 +19,12 @@ if obj.status ~= nil and obj.status.conditions ~= nil then
       end
       health_status.message = health_status.message .. msg .. "\n"
       if condition.status == "False" then
-        status_false = status_false + 1
+        -- Make an exception for when the Revision is (most likely) scaling the cluster.
+        if condition.reason == "RevisionFailed" and string.find(condition.message, "nodes are available") then
+          status_unknown = status_unknown + 1
+        else
+          status_false = status_false + 1
+        end
       else
         status_unknown = status_unknown + 1
       end
